@@ -45,9 +45,12 @@ button {
 .Player { color: #ff0000; }
 .Consequence { color: #ffff00; }
 
-/* Summary at the top */
+/* Summary at the top (smaller font to avoid scaling issues) */
 .summary {
     margin-bottom: 10px;
+    font-size: 14px;      /* smaller than before */
+    display: block;       /* full width */
+    line-height: 1.4;     /* tighter spacing */
 }
 </style>
 </head>
@@ -128,7 +131,7 @@ document.getElementById('runSim').onclick = ()=>{
     // Clear previous log
     logDiv.innerHTML = '';
 
-    // Show summary counts
+    // Show summary counts (scaled down)
     const sumDiv = document.createElement('div');
     sumDiv.className = 'summary';
     sumDiv.innerHTML = Object.keys(summary).map(k => `${k}: ${summary[k]}`).join(' | ');
