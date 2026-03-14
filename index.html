@@ -2,30 +2,58 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>ORACULAR PENDULUM PROTOTYPE</title>
+<title>Oracular Chronometer</title>
 <style>
-    body { font-family: monospace; background: #111; color: #fff; padding: 20px; }
-    button { padding: 10px; font-size: 16px; margin-bottom: 20px; cursor: pointer; }
-    .log { margin-top: 20px; max-width: 600px; }
-    .event { padding: 2px 4px; margin-bottom: 2px; border-radius: 3px; display: block; word-break: break-word; }
-    /* Colors & icons per type */
-    .Farming { color: #00ff00; }
-    .Weather { color: #00ffff; }
-    .Social { color: #ffb300; }
-    .Holiday { color: #ff69b4; }
-    .Secret { color: #ff00ff; }
-    .Mystery { color: #ffa500; }
-    .Passive { color: #808080; }
-    .Player { color: #ff0000; }
-    .Consequence { color: #ffff00; }
-    .summary { margin-bottom: 10px; }
+body {
+    font-family: monospace;
+    background: #111;
+    color: #fff;
+    padding: 20px;
+    white-space: nowrap; /* prevent word wrap */
+    overflow-x: auto;    /* horizontal scroll if needed */
+}
+
+button {
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.log {
+    margin-top: 20px;
+}
+
+.event {
+    display: inline-block;   /* keeps events on one line */
+    padding: 2px 6px;
+    margin-right: 8px;
+    border-radius: 3px;
+    word-break: normal;
+    white-space: nowrap;
+}
+
+/* Colors and icons per type */
+.Farming { color: #00ff00; }
+.Weather { color: #00ffff; }
+.Social { color: #ffb300; }
+.Holiday { color: #ff69b4; }
+.Secret { color: #ff00ff; }
+.Mystery { color: #ffa500; }
+.Passive { color: #808080; }
+.Player { color: #ff0000; }
+.Consequence { color: #ffff00; }
+
+.summary {
+    margin-bottom: 10px;
+    display: inline-block;
+}
 </style>
 </head>
 <body>
 
-<h2>The ORACULAR PENDULUM Prototype</h2>
-<h3>3/14/26 build for 54th Street bar & grill</h3>
-<p>Click "Run Simulation" to see RNG events over 365 days.</p>
+<h2>🔮 Oracular Chronometer</h2>
+<p>Observe the threads of fate over 365 days. Click "Run Simulation" to reveal events.</p>
 
 <button id="runSim">Run Simulation</button>
 
@@ -57,12 +85,16 @@ class Simulation {
         for(let day=1; day<=this.days; day++){
             this.types.forEach(type=>{
                 if(Math.random() < type.chance){
-                    this.events.push({day: day, type: type.name, text: `${type.emoji} ${type.name} event on day ${day}`});
+                    this.events.push({
+                        day: day,
+                        type: type.name,
+                        text: `${type.emoji} ${type.name} event on day ${day}`
+                    });
                     lastProgress[type.name] = day;
                 }
             });
 
-            // Special: consequence if player didn't act
+            // Consequence for inaction
             if(day - lastProgress["Player"] > 7){
                 this.events.push({
                     day: day,
@@ -92,7 +124,7 @@ document.getElementById('runSim').onclick = ()=>{
     const events = sim.getEvents();
     const summary = sim.getSummary();
 
-    // Clear log
+    // Clear previous log
     logDiv.innerHTML = '';
 
     // Show summary counts
@@ -101,7 +133,7 @@ document.getElementById('runSim').onclick = ()=>{
     sumDiv.innerHTML = Object.keys(summary).map(k => `${k}: ${summary[k]}`).join(' | ');
     logDiv.appendChild(sumDiv);
 
-    // Show event list
+    // Show events inline (horizontal)
     events.forEach(e=>{
         const div = document.createElement('div');
         div.className = `event ${e.type}`;
