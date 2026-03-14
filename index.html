@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Timeline Simulation Demo</title>
+    <style>
+        body { font-family: monospace; background: #111; color: #0f0; padding: 20px; }
+        button { padding: 10px; margin-bottom: 20px; font-size: 16px; }
+        .log { margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<button id="runSim">Run Simulation</button>
+
+<div class="log" id="log"></div>
+
+<script>
+class Simulation {
+    constructor(days=365) {
+        this.days = days;
+        this.eventLog = {Farming: [], Economy: [], Story: []};
+    }
+
+    run() {
+        // Clear previous events
+        this.eventLog = {Farming: [], Economy: [], Story: []};
+        let lastProgress = {Farming: 0, Economy: 0, Story: 0};
+
+        for(let day=1; day<=this.days; day++){
+            // Random progress
+            if(Math.random()<0.5) lastProgress.Farming = day;
+            if(Math.random()<0.5) lastProgress.Economy = day;
+            if(Math.random()<0.5) lastProgress.Story = day;
+
+            // Check triggers
+            if(day - lastProgress.Farming === 3 || day - lastProgress.Farming === 7)
+                this.eventLog.Farming.push(day);
+            if(day - lastProgress.Economy === 3)
+                this.eventLog.Economy.push(day);
+            if(day - lastProgress.Story === 5)
+                this.eventLog.Story.push(day);
+        }
+    }
+
+    getSummary() {
+        return {
+            totalDays: this.days,
+            farmingEvents: this.eventLog.Farming,
+            economyEvents: this.eventLog.Economy,
+            storyEvents: this.eventLog.Story
+        };
+    }
+}
+
+// --- UI ---
+const sim = new Simulation();
+const logDiv = document.getElementById('log');
+document.getElementById('runSim').onclick = () => {
+    sim.run();
+    const summary = sim.getSummary();
+    logDiv.innerHTML = `
+        Total Days Simulated: ${summary.totalDays}<br><br>
+        Farming Events (${summary.farmingEvents.length}): ${summary.farmingEvents.join(", ")}<br>
+        Economy Events (${summary.economyEvents.length}): ${summary.economyEvents.join(", ")}<br>
+        Story Events (${summary.storyEvents.length}): ${summary.storyEvents.join(", ")}
+    `;
+};
+</script>
+
+</body>
+</html>
