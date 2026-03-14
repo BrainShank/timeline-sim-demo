@@ -5,9 +5,10 @@
 <title>Expanded Timeline Simulation</title>
 <style>
     body { font-family: monospace; background: #111; color: #fff; padding: 20px; }
-    button { padding: 10px; margin-bottom: 20px; font-size: 16px; }
+    button { padding: 10px; font-size: 16px; margin-bottom: 20px; cursor: pointer; }
     .log { margin-top: 20px; max-width: 600px; }
-    .event { padding: 2px 4px; margin-bottom: 2px; border-radius: 3px; display: block; }
+    .event { padding: 2px 4px; margin-bottom: 2px; border-radius: 3px; display: block; word-break: break-word; }
+    /* Colors & icons per type */
     .Farming { color: #00ff00; }
     .Weather { color: #00ffff; }
     .Social { color: #ffb300; }
@@ -17,9 +18,13 @@
     .Passive { color: #808080; }
     .Player { color: #ff0000; }
     .Consequence { color: #ffff00; }
+    .summary { margin-bottom: 10px; }
 </style>
 </head>
 <body>
+
+<h2>🌟 Expanded Timeline Simulation</h2>
+<p>Click "Run Simulation" to see RNG events over 365 days.</p>
 
 <button id="runSim">Run Simulation</button>
 
@@ -31,48 +36,37 @@ class Simulation {
         this.days = days;
         this.events = [];
         this.types = [
-            "Farming","Weather","Social","Holiday","Secret","Mystery",
-            "Passive","Player","Consequence"
+            {name:"Farming", emoji:"🌾", chance:0.1},
+            {name:"Weather", emoji:"☀️", chance:0.08},
+            {name:"Social", emoji:"💬", chance:0.07},
+            {name:"Holiday", emoji:"🎉", chance:0.03},
+            {name:"Secret", emoji:"🕵️", chance:0.02},
+            {name:"Mystery", emoji:"❓", chance:0.02},
+            {name:"Passive", emoji:"⏳", chance:0.15},
+            {name:"Player", emoji:"⚡", chance:0.05},
+            {name:"Consequence", emoji:"❗", chance:0.05}
         ];
     }
 
     run(){
-        // clear previous
         this.events = [];
         let lastProgress = {};
-        this.types.forEach(t => lastProgress[t] = 0);
+        this.types.forEach(t => lastProgress[t.name] = 0);
 
         for(let day=1; day<=this.days; day++){
-            // Randomly decide which events trigger
             this.types.forEach(type=>{
-                let chance = 0.05; // default 5%
-                switch(type){
-                    case "Farming": chance = 0.1; break;
-                    case "Weather": chance = 0.08; break;
-                    case "Social": chance = 0.07; break;
-                    case "Holiday": chance = 0.03; break;
-                    case "Secret": chance = 0.02; break;
-                    case "Mystery": chance = 0.02; break;
-                    case "Passive": chance = 0.15; break;
-                    case "Player": chance = 0.05; break;
-                    case "Consequence": chance = 0.05; break;
-                }
-                if(Math.random() < chance){
-                    this.events.push({
-                        day: day,
-                        type: type,
-                        text: `${type} event triggered on day ${day}`
-                    });
-                    lastProgress[type] = day;
+                if(Math.random() < type.chance){
+                    this.events.push({day: day, type: type.name, text: `${type.emoji} ${type.name} event on day ${day}`});
+                    lastProgress[type.name] = day;
                 }
             });
 
-            // Example: consequence if player didn't act
+            // Special: consequence if player didn't act
             if(day - lastProgress["Player"] > 7){
                 this.events.push({
                     day: day,
                     type: "Consequence",
-                    text: `Consequence: Player didn't act by day ${day}`
+                    text: `❗ Consequence: Player didn't act by day ${day}`
                 });
                 lastProgress["Player"] = day; // reset counter
             }
@@ -80,6 +74,13 @@ class Simulation {
     }
 
     getEvents(){ return this.events; }
+
+    getSummary(){
+        let summary = {};
+        this.types.forEach(t => summary[t.name] = 0);
+        this.events.forEach(e => { summary[e.type]++; });
+        return summary;
+    }
 }
 
 const sim = new Simulation();
@@ -88,9 +89,18 @@ const logDiv = document.getElementById('log');
 document.getElementById('runSim').onclick = ()=>{
     sim.run();
     const events = sim.getEvents();
+    const summary = sim.getSummary();
 
-    // Build HTML output
+    // Clear log
     logDiv.innerHTML = '';
+
+    // Show summary counts
+    const sumDiv = document.createElement('div');
+    sumDiv.className = 'summary';
+    sumDiv.innerHTML = Object.keys(summary).map(k => `${k}: ${summary[k]}`).join(' | ');
+    logDiv.appendChild(sumDiv);
+
+    // Show event list
     events.forEach(e=>{
         const div = document.createElement('div');
         div.className = `event ${e.type}`;
